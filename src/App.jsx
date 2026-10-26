@@ -10,15 +10,14 @@ const [excelData, setExcelData] = useState(() => {
     const savedData = localStorage.getItem("data");
     return savedData ? JSON.parse(savedData) : [];
   } catch (error) {
-    console.error("Error loading saved data:", error);
-    return [];
+   return [];
   }
 });
 useEffect(() => {
   localStorage.setItem("data", JSON.stringify(excelData));
 }, [excelData]);
 const [excelDataEletedItems, setExcelDataDletedItmes] = useState([]);
-
+const [searchTerm, setSearchTerm] = useState("");
 const [quantity, setQuantity] = useState("");
 const onDownloadExcel = () => {
   const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -50,7 +49,6 @@ const onDownloadExcel = () => {
       const data = XLSX.utils.sheet_to_json(worksheet);
 
       if (data.length === 0) {
-        console.warn('The Excel worksheet is empty.');
         return;
       }
 
@@ -60,9 +58,7 @@ const onDownloadExcel = () => {
 
       setQuantity(String(firstRow.QuantityInPOS ?? ''));
 
-      console.log('Excel data:', data);
     } catch (error) {
-      console.error('Error reading Excel file:', error);
     }
   };
 
@@ -114,7 +110,6 @@ const onDownloadExcel = () => {
     )
   );
 };
-  console.log(excelData)
 
   return (
     <div className="flex  min-h-screen flex-col items-center gap-4 bg-red-200 ">
@@ -157,6 +152,8 @@ const onDownloadExcel = () => {
           />
         </label>
       </div>
+      {/* Search bar */}
+
   { /* <div className="flex w-full max-w-md flex-col gap-3">
         <label
           htmlFor="excell-upload"
@@ -196,11 +193,25 @@ const onDownloadExcel = () => {
       </div>*/}
   
   </div>
-
+<div className="w-full max-w-md px-4">
+  <input
+    type="text"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    placeholder="Search product by name..."
+    className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-gray-800 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+  />
+</div>
       {/* Product information */}
       <div className="w-full gap-5 justify-center flex-1 flex flex-wrap rounded-xl  p-4">
         
-{excelData?.map((data, index) => (
+{excelData
+  ?.filter((data) =>
+    String(data["Product Name"] ?? "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase().trim())
+  )
+  .map((data, index) => (
  <React.Fragment key={index}>
  {data["Quantity In POS"] !=='0.000'&& <div
 
